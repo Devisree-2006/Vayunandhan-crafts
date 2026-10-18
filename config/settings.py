@@ -75,10 +75,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
-# ─── Database ───────────────────────────────────────────────────────────────────
-_db_engine = os.environ.get('DB_ENGINE', '')
 
-if _db_engine == 'django.db.backends.mysql':
+# ─── Database ─────────────────────────────────────────────
+_db_engine = os.environ.get('DB_ENGINE', '')
+_database_url = os.environ.get('DATABASE_URL')
+
+if _database_url:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(
+            _database_url,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
+    }
+elif _db_engine == 'django.db.backends.mysql':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
