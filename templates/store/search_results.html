@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Search: {{ query }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2rem">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'store:home' %}">Home</a>
+    <span class="breadcrumb__sep">›</span>
+    <span aria-current="page">Search results for "{{ query }}"</span>
+  </nav>
+
+  <h1 style="margin-bottom:1.5rem;font-size:1.5rem">
+    Search results for <em style="color:var(--clr-primary)">"{{ query }}"</em>
+    <span style="font-family:var(--font-body);font-size:.9rem;color:var(--clr-text-muted);font-weight:400">({{ page_obj.paginator.count }} found)</span>
+  </h1>
+
+  <!-- Search form -->
+  <form action="{% url 'store:search' %}" method="get" class="search-form" style="max-width:480px;margin-bottom:2rem" role="search">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search again…" aria-label="Search products" id="searchInput">
+    <button type="submit" aria-label="Search">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    </button>
+  </form>
+
+  {% if page_obj.object_list %}
+    <div class="products-grid">
+      {% for product in page_obj %}
+        {% include 'store/partials/product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <nav class="pagination" aria-label="Search result pages">
+      {% if page_obj.has_previous %}
+        <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="page-btn">‹</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="page-btn active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?q={{ query }}&page={{ num }}" class="page-btn">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="page-btn">›</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state__icon">🔍</div>
+      <h2 class="empty-state__title">No results found</h2>
+      <p class="empty-state__text">We couldn't find anything matching "{{ query }}". Try different keywords or browse our categories.</p>
+      <a href="{% url 'store:shop' %}" class="btn btn-primary">Browse All Products</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

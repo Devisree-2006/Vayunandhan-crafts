@@ -1,0 +1,63 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block dash_title %}Products{% endblock %}
+{% block dash_title_bar %}🛍️ Products{% endblock %}
+
+{% block dash_content %}
+<div class="dash-table-wrap">
+  <div class="dash-table-header">
+    <span class="dash-table-title">Products ({{ page_obj.paginator.count }})</span>
+    <a href="{% url 'dashboard:product_add' %}" class="btn btn-primary btn-sm">+ Add Product</a>
+  </div>
+
+  <form method="get" class="filter-row">
+    <input type="text" name="q" placeholder="Search name / SKU…" value="{{ search }}" class="form-control" style="max-width:200px">
+    <select name="cat" class="form-control" style="max-width:180px">
+      <option value="">All Categories</option>
+      {% for c in categories %}<option value="{{ c.pk }}" {% if cat_id == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    <select name="status" class="form-control" style="max-width:140px">
+      <option value="">All</option>
+      <option value="active"   {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'dashboard:products' %}" class="btn btn-outline btn-sm">Clear</a>
+  </form>
+
+  <table>
+    <thead><tr><th>Image</th><th>Name</th><th>SKU</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for p in page_obj %}
+      <tr>
+        <td>{% with img=p.primary_image %}{% if img %}<img src="{{ img.image.url }}" alt="" style="width:44px;height:44px;border-radius:6px;object-fit:cover">{% else %}<div style="width:44px;height:44px;background:var(--clr-bg-lavender);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">🎀</div>{% endif %}{% endwith %}</td>
+        <td style="font-weight:600">{{ p.name }}
+          {% if p.is_featured %}<span class="badge badge--featured" style="font-size:.6rem">Featured</span>{% endif %}
+          {% if p.is_new_arrival %}<span class="badge badge--new" style="font-size:.6rem">New</span>{% endif %}
+        </td>
+        <td style="font-size:.8rem;color:var(--clr-text-muted)">{{ p.sku }}</td>
+        <td style="font-size:.82rem">{{ p.category.name|default:"—" }}</td>
+        <td>₹{{ p.selling_price }}{% if p.original_price %}<br><span style="font-size:.74rem;text-decoration:line-through;color:var(--clr-text-muted)">₹{{ p.original_price }}</span>{% endif %}</td>
+        <td>{% if p.stock == 0 %}<span style="color:#d32f2f;font-weight:700">0</span>{% elif p.is_low_stock %}<span style="color:#e65100;font-weight:700">{{ p.stock }} ⚠️</span>{% else %}{{ p.stock }}{% endif %}</td>
+        <td><span class="status-badge {% if p.status == 'active' %}status-verified{% else %}status-cancelled{% endif %}">{{ p.get_status_display }}</span></td>
+        <td style="white-space:nowrap">
+          <a href="{% url 'dashboard:product_edit' p.pk %}" class="btn btn-sm btn-outline">Edit</a>
+          <a href="{{ p.get_absolute_url }}" target="_blank" class="btn btn-sm btn-outline" style="margin-left:.3rem">↗</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--clr-text-muted)">No products found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if page_obj.has_other_pages %}
+  <div style="padding:1rem;display:flex;justify-content:center">
+    <nav class="pagination">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="page-btn">‹</a>{% endif %}
+      {% for n in page_obj.paginator.page_range %}{% if page_obj.number == n %}<span class="page-btn active">{{ n }}</span>{% elif n > page_obj.number|add:'-3' and n < page_obj.number|add:'3' %}<a href="?page={{ n }}" class="page-btn">{{ n }}</a>{% endif %}{% endfor %}
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="page-btn">›</a>{% endif %}
+    </nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% load static %}
+<article class="card product-card" aria-label="{{ product.name }}">
+
+  <!-- Badges -->
+  <div class="product-card__badge" aria-hidden="true">
+    {% if product.is_new_arrival %}<span class="badge badge--new">New</span>{% endif %}
+    {% if product.discount_percent %}<span class="badge badge--sale">-{{ product.discount_percent }}%</span>{% endif %}
+    {% if not product.is_in_stock %}<span class="badge badge--oos">Sold Out</span>{% endif %}
+  </div>
+
+  <!-- Image -->
+  <a href="{{ product.get_absolute_url }}" class="product-card__img-wrap" tabindex="-1" aria-hidden="true">
+    {% with img=product.primary_image %}
+      {% if img %}
+        <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" loading="lazy">
+      {% else %}
+        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;background:var(--clr-bg-lavender)" aria-hidden="true">🎀</div>
+      {% endif %}
+    {% endwith %}
+  </a>
+
+  <!-- Body -->
+  <div class="product-card__body">
+    {% if product.category %}
+      <span class="product-card__cat">{{ product.category.name }}</span>
+    {% endif %}
+
+    <h3 class="product-card__name">
+      <a href="{{ product.get_absolute_url }}" style="color:inherit;text-decoration:none">{{ product.name }}</a>
+    </h3>
+
+    <div class="product-card__price">
+      <span class="price">₹{{ product.selling_price }}</span>
+      {% if product.original_price and product.original_price > product.selling_price %}
+        <span class="original">₹{{ product.original_price }}</span>
+        <span class="discount">{{ product.discount_percent }}% off</span>
+      {% endif %}
+    </div>
+
+    <div class="product-card__actions">
+      {% if product.is_in_stock %}
+        <form action="{% url 'orders:add_to_cart' product.pk %}" method="post" class="add-to-cart-form" style="flex:1">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="btn btn-primary btn-sm btn-block">
+            🛒 Add to Cart
+          </button>
+        </form>
+      {% else %}
+        <button class="btn btn-sm btn-block" disabled style="background:var(--clr-bg-soft);color:var(--clr-text-muted);border:2px solid var(--clr-border)">
+          Out of Stock
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+</article>

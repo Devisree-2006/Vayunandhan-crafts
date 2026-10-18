@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Track Your Order{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2.5rem;max-width:680px">
+  <h1 style="font-size:1.8rem;color:var(--clr-plum);margin-bottom:2rem;text-align:center">📦 Track Your Order</h1>
+
+  <!-- Lookup form -->
+  <div class="card" style="padding:2rem;margin-bottom:2rem">
+    <form method="get" action="{% url 'orders:track' %}" novalidate>
+      <div class="form-group">
+        <label for="ref" class="form-label">Order Reference Number <span class="req">*</span></label>
+        <input type="text" id="ref" name="ref" class="form-control"
+               value="{{ query_ref|default:'' }}" placeholder="e.g. VC-3F8A2B"
+               required style="letter-spacing:.05em;text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label for="verify_email" class="form-label">Email Address <span class="req">*</span></label>
+        <input type="email" id="verify_email" name="email" class="form-control"
+               value="{{ query_email|default:'' }}" placeholder="Email used at checkout">
+        <span class="form-hint">Enter the email address you used when placing the order.</span>
+      </div>
+      {% if track_error %}
+        <div class="alert alert-error">
+          <span>❌</span>
+          <span>{{ track_error }}</span>
+        </div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary btn-block">Track Order</button>
+    </form>
+  </div>
+
+  <!-- Results -->
+  {% if order %}
+  <div class="card" style="padding:2rem">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
+      <div>
+        <h2 style="font-size:1.2rem;color:var(--clr-plum);margin-bottom:.2rem">Order {{ order.reference }}</h2>
+        <p style="font-size:.85rem;color:var(--clr-text-muted)">Placed on {{ order.created_at|date:"d M Y" }}</p>
+      </div>
+      <span class="status-badge status-{{ order.status|slugify }}">{{ order.get_status_display }}</span>
+    </div>
+
+    <!-- Timeline -->
+    <div class="order-timeline" aria-label="Order timeline">
+      {% for step in timeline_steps %}
+      <div class="timeline-step {% if step.done %}done{% elif step.active %}active{% endif %}">
+        <div class="timeline-step__dot" aria-hidden="true"></div>
+        <div>
+          <p class="timeline-step__label">{{ step.label }}</p>
+          {% if step.date %}
+            <p class="timeline-step__date">{{ step.date }}</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Shipment info -->
+    {% if order.shipment.awb_number %}
+    <div style="margin-top:1.5rem;padding:1rem;background:var(--clr-bg-soft);border-radius:var(--radius-md)">
+      <p style="font-size:.9rem;font-weight:700;color:var(--clr-plum);margin-bottom:.4rem">🚚 Shipment Info</p>
+      <p style="font-size:.88rem;color:var(--clr-text-muted)">
+        Courier: {{ order.shipment.courier_name }}<br>
+        Tracking No: <strong>{{ order.shipment.awb_number }}</strong>
+        {% if order.shipment.get_tracking_link %}
+          <br><a href="{{ order.shipment.get_tracking_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline mt-1">Track on Courier Site ↗</a>
+        {% endif %}
+      </p>
+    </div>
+    {% endif %}
+
+    <!-- Items -->
+    <div style="margin-top:1.5rem;border-top:1px solid var(--clr-border);padding-top:1.25rem">
+      <h3 style="font-size:.9rem;margin-bottom:.75rem;color:var(--clr-plum)">Items in this order</h3>
+      {% for item in order.items.all %}
+      <div style="display:flex;justify-content:space-between;font-size:.88rem;padding:.35rem 0;border-bottom:1px dashed var(--clr-border)">
+        <span>{{ item.product_name }} × {{ item.quantity }}</span>
+        <strong>₹{{ item.subtotal }}</strong>
+      </div>
+      {% endfor %}
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1rem;padding:.6rem 0;margin-top:.3rem">
+        <span style="color:var(--clr-plum)">Total</span>
+        <span style="color:var(--clr-primary)">₹{{ order.total_amount }}</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;text-align:center">
+    <a href="{% url 'store:contact' %}" style="font-size:.85rem;color:var(--clr-text-muted)">Need help? Contact us →</a>
+  </div>
+</div>
+{% endblock %}

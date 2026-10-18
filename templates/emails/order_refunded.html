@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Refund Processed – {{ order.reference }}</title>
+<style>
+  body{margin:0;padding:0;background:#f9f0f3;font-family:Arial,sans-serif;color:#3d2030}
+  .wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(232,100,122,.12)}
+  .header{background:linear-gradient(135deg,#e8647a,#b39ddb);padding:2rem;text-align:center;color:#fff}
+  .body{padding:2rem}
+  .info-box{background:#e8f5e9;border-left:4px solid #4caf50;padding:1rem;border-radius:8px;margin:1rem 0;font-size:.9rem}
+  .footer{background:#4a2040;color:rgba(255,255,255,.65);padding:1.25rem;text-align:center;font-size:.8rem}
+  .footer a{color:#f48fb1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    {% if logo_url %}<img src="{{ logo_url }}" alt="{{ store_name }}" style="height:46px;border-radius:8px">{% endif %}
+    <h1 style="margin:.75rem 0 0;font-size:1.4rem">Refund Processed 💰</h1>
+  </div>
+  <div class="body">
+    <p>Hi <strong>{{ order.customer_name }}</strong>,</p>
+    <div class="info-box">
+      ✅ A refund of <strong>₹{{ order.total_amount }}</strong> for Order <strong>{{ order.reference }}</strong>
+      has been processed. It should reflect in your account within 5–7 business days.
+    </div>
+    <p style="font-size:.85rem;color:#8a6070;margin-top:1.5rem">Contact: {{ store_phone }}</p>
+  </div>
+  <div class="footer">© {{ store_name }} · <a href="{{ store_url }}">Visit Store</a></div>
+</div>
+</body>
+</html>

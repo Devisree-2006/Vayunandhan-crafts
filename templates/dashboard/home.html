@@ -1,0 +1,97 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block dash_title %}Dashboard{% endblock %}
+{% block dash_title_bar %}📊 Dashboard{% endblock %}
+
+{% block dash_content %}
+<!-- Stat cards -->
+<div class="dash-stats">
+  <div class="dash-card dash-card--primary"><div class="dash-card__label">Total Orders</div><div class="dash-card__value">{{ stats.total_orders }}</div></div>
+  <div class="dash-card dash-card--orange"><div class="dash-card__label">Today's Orders</div><div class="dash-card__value">{{ stats.today_orders }}</div></div>
+  <div class="dash-card" style="border-top:4px solid #ffa000"><div class="dash-card__label">UPI Verify Pending</div><div class="dash-card__value">{{ stats.verify_pending }}</div></div>
+  <div class="dash-card dash-card--green"><div class="dash-card__label">Revenue Today</div><div class="dash-card__value">₹{{ stats.revenue_today|floatformat:0|intcomma }}</div></div>
+  <div class="dash-card dash-card--green"><div class="dash-card__label">Revenue This Month</div><div class="dash-card__value">₹{{ stats.revenue_month|floatformat:0|intcomma }}</div></div>
+  <div class="dash-card dash-card--purple"><div class="dash-card__label">Total Revenue</div><div class="dash-card__value">₹{{ stats.revenue_total|floatformat:0|intcomma }}</div></div>
+  <div class="dash-card"><div class="dash-card__label">Active Products</div><div class="dash-card__value">{{ stats.active_products }}</div></div>
+  <div class="dash-card" style="border-top:4px solid #ef5350"><div class="dash-card__label">Low Stock</div><div class="dash-card__value">{{ stats.low_stock }}</div><div class="dash-card__sub">{{ stats.out_of_stock }} out of stock</div></div>
+  <div class="dash-card"><div class="dash-card__label">Dispatched</div><div class="dash-card__value">{{ stats.dispatched }}</div></div>
+  <div class="dash-card dash-card--green"><div class="dash-card__label">Delivered</div><div class="dash-card__value">{{ stats.delivered }}</div></div>
+</div>
+
+<!-- Revenue chart -->
+<div class="dash-card" style="padding:1.5rem;margin-bottom:1.5rem">
+  <h2 style="font-size:1rem;margin-bottom:1rem;color:var(--clr-plum)">Revenue – Last 7 Days</h2>
+  <canvas id="revenueChart" height="80"></canvas>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+  <!-- Recent orders -->
+  <div class="dash-table-wrap">
+    <div class="dash-table-header">
+      <span class="dash-table-title">Recent Orders</span>
+      <a href="{% url 'dashboard:orders' %}" class="btn btn-sm btn-outline">View All</a>
+    </div>
+    <table>
+      <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for o in recent_orders %}
+        <tr>
+          <td><a href="{% url 'dashboard:order_detail' o.reference %}" style="font-weight:700;color:var(--clr-primary)">{{ o.reference }}</a></td>
+          <td>{{ o.customer_name }}</td>
+          <td>₹{{ o.total_amount }}</td>
+          <td><span class="status-badge status-{{ o.status|slugify }}">{{ o.get_status_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--clr-text-muted)">No orders yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pending UPI -->
+  <div class="dash-table-wrap">
+    <div class="dash-table-header">
+      <span class="dash-table-title">⏳ UPI Pending Verification</span>
+      <a href="{% url 'dashboard:payments' %}?status=verification_pending" class="btn btn-sm btn-outline">View All</a>
+    </div>
+    <table>
+      <thead><tr><th>Order</th><th>Amount</th><th>Date</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for p in pending_upi %}
+        <tr>
+          <td><a href="{% url 'dashboard:order_detail' p.order.reference %}" style="font-weight:700;color:var(--clr-primary)">{{ p.order.reference }}</a></td>
+          <td>₹{{ p.amount }}</td>
+          <td style="font-size:.8rem;color:var(--clr-text-muted)">{{ p.created_at|date:"d M, H:i" }}</td>
+          <td>
+            <form method="post" action="{% url 'dashboard:verify_upi_payment' p.pk %}" style="display:flex;gap:.3rem">
+              {% csrf_token %}
+              <button name="action" value="approve" class="btn btn-sm" style="background:#4caf50;color:#fff;border-color:#4caf50;padding:.3rem .6rem" title="Approve">✓</button>
+              <button name="action" value="reject"  class="btn btn-sm" style="background:#ef5350;color:#fff;border-color:#ef5350;padding:.3rem .6rem" title="Reject">✕</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--clr-text-muted)">No pending verifications 🎉</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block dash_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('revenueChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ chart_labels|safe }},
+    datasets: [{ label: 'Revenue (₹)', data: {{ chart_data|safe }},
+      backgroundColor: 'rgba(232,100,122,0.75)', borderColor: '#e8647a',
+      borderWidth: 2, borderRadius: 6 }]
+  },
+  options: { responsive:true, plugins:{legend:{display:false}},
+    scales:{ y:{ beginAtZero:true, ticks:{ callback: v => '₹'+v }}} }
+});
+</script>
+{% endblock %}

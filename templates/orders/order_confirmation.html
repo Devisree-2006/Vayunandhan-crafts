@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmed – {{ order.reference }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:3rem;max-width:720px;text-align:center">
+
+  {% if store_settings.logo %}
+    <img src="{{ store_settings.logo.url }}" alt="{{ store_settings.store_name }}" style="height:56px;margin:0 auto 1.5rem;border-radius:8px">
+  {% endif %}
+
+  <div style="font-size:4rem;margin-bottom:1rem" aria-hidden="true">🎉</div>
+  <h1 style="font-size:2rem;color:var(--clr-plum);margin-bottom:.5rem">Order Confirmed!</h1>
+  <p style="color:var(--clr-text-muted);margin-bottom:.5rem">Thank you, {{ order.customer_name }}! Your order has been placed successfully. 💕</p>
+  <p style="font-size:1.1rem;font-weight:700;color:var(--clr-primary);margin-bottom:2rem">
+    Order ID: <span style="font-family:monospace">{{ order.reference }}</span>
+  </p>
+
+  <!-- Payment status note -->
+  {% if payment.method == 'upi_manual' %}
+  <div class="alert alert-warning" style="text-align:left;margin-bottom:1.5rem">
+    <span>📱</span>
+    <div>
+      <strong>Manual UPI Payment Submitted</strong><br>
+      Your order is pending payment verification. Please allow a few hours for us to confirm your payment. You'll receive an email and WhatsApp message once verified.
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-success" style="text-align:left;margin-bottom:1.5rem">
+    <span>✅</span>
+    <div>
+      <strong>Payment Successful!</strong><br>
+      Your payment has been confirmed. We'll start preparing your order right away!
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Order Details Card -->
+  <div class="card" style="padding:2rem;text-align:left;margin-bottom:1.5rem">
+    <h2 style="font-size:1.1rem;margin-bottom:1.25rem;color:var(--clr-plum)">📋 Order Details</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;font-size:.9rem">
+      <div><span style="color:var(--clr-text-muted)">Order ID:</span><br><strong>{{ order.reference }}</strong></div>
+      <div><span style="color:var(--clr-text-muted)">Date:</span><br><strong>{{ order.created_at|date:"d M Y, g:i A" }}</strong></div>
+      <div><span style="color:var(--clr-text-muted)">Payment:</span><br><strong>{{ payment.get_method_display }}</strong></div>
+      <div><span style="color:var(--clr-text-muted)">Status:</span><br>
+        <span class="status-badge status-{% if order.status == 'payment_verified' %}verified{% elif order.status == 'payment_verification_pending' %}verification{% else %}placed{% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </div>
+    </div>
+
+    <h3 style="font-size:.95rem;margin-bottom:.75rem;color:var(--clr-plum)">Items Ordered</h3>
+    {% for item in order.items.all %}
+    <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px dashed var(--clr-border);font-size:.9rem">
+      <span>{{ item.product_name }} × {{ item.quantity }}</span>
+      <strong>₹{{ item.subtotal }}</strong>
+    </div>
+    {% endfor %}
+
+    <div style="margin-top:1rem">
+      <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:.3rem 0">
+        <span style="color:var(--clr-text-muted)">Subtotal</span>
+        <span>₹{{ order.subtotal }}</span>
+      </div>
+      {% if order.discount_amount > 0 %}
+      <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:.3rem 0;color:var(--clr-primary)">
+        <span>Discount</span>
+        <span>−₹{{ order.discount_amount }}</span>
+      </div>
+      {% endif %}
+      <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:.3rem 0">
+        <span style="color:var(--clr-text-muted)">Delivery</span>
+        <span>{% if order.delivery_charge == 0 %}FREE{% else %}₹{{ order.delivery_charge }}{% endif %}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.05rem;padding:.6rem 0;border-top:2px solid var(--clr-border);margin-top:.4rem">
+        <span style="color:var(--clr-plum)">Total Paid</span>
+        <span style="color:var(--clr-primary)">₹{{ order.total_amount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Address -->
+  <div class="card" style="padding:1.5rem;text-align:left;margin-bottom:1.5rem">
+    <h2 style="font-size:1rem;margin-bottom:.75rem;color:var(--clr-plum)">📦 Delivery Address</h2>
+    <p style="font-size:.9rem;color:var(--clr-text-muted);line-height:1.7">
+      {{ order.customer_name }}<br>
+      {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}<br>
+      {{ order.city }}, {{ order.state }} – {{ order.pincode }}
+    </p>
+  </div>
+
+  <!-- Next steps -->
+  <div class="card" style="padding:1.5rem;background:var(--clr-bg-soft);text-align:left;margin-bottom:2rem">
+    <h2 style="font-size:1rem;margin-bottom:.75rem;color:var(--clr-plum)">📬 What's Next?</h2>
+    <ul style="font-size:.88rem;color:var(--clr-text-muted);line-height:2">
+      <li>✉️ A confirmation email will be sent to <strong>{{ order.customer_email }}</strong></li>
+      <li>💬 You'll receive a WhatsApp update on <strong>{{ order.customer_phone }}</strong></li>
+      <li>📦 We'll start preparing your order once payment is confirmed</li>
+      <li>🔍 Track your order using your Order ID: <strong>{{ order.reference }}</strong></li>
+    </ul>
+  </div>
+
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a href="{% url 'orders:track' %}?ref={{ order.reference }}" class="btn btn-primary">Track My Order</a>
+    <a href="{% url 'store:shop' %}" class="btn btn-outline">Continue Shopping 🛍️</a>
+  </div>
+</div>
+{% endblock %}

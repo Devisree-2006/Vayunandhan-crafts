@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Payment – {{ order.reference }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2.5rem;max-width:680px">
+  <h1 style="font-size:1.8rem;color:var(--clr-plum);margin-bottom:.5rem;text-align:center">Complete Your Payment 💳</h1>
+  <p style="text-align:center;color:var(--clr-text-muted);margin-bottom:2rem">Order: <strong>{{ order.reference }}</strong> · Total: <strong style="color:var(--clr-primary)">₹{{ order.total_amount }}</strong></p>
+
+  <!-- ── Razorpay ──────────────────────────────────────────────────────────────── -->
+  {% if payment.method == 'razorpay' %}
+  <div class="card" style="padding:2rem;text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:1rem" aria-hidden="true">💳</div>
+    <h2 style="font-size:1.1rem;color:var(--clr-plum);margin-bottom:.75rem">Pay via Razorpay</h2>
+    <p style="font-size:.9rem;color:var(--clr-text-muted);margin-bottom:1.5rem">
+      Click the button below to open the secure payment window. You can pay via UPI, card, net banking or wallet.
+    </p>
+    <button id="razorpayPayBtn" class="btn btn-primary btn-lg" data-order-ref="{{ order.reference }}">
+      Pay ₹{{ order.total_amount }} Now
+    </button>
+
+    <!-- Hidden form to submit verified payment IDs to backend -->
+    <form id="razorpayCallbackForm" method="post" action="{% url 'payments:razorpay_callback' %}">
+      {% csrf_token %}
+      <input type="hidden" name="order_ref" value="{{ order.reference }}">
+      <input type="hidden" name="razorpay_payment_id" value="">
+      <input type="hidden" name="razorpay_order_id" value="">
+      <input type="hidden" name="razorpay_signature" value="">
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- ── Manual UPI ────────────────────────────────────────────────────────────── -->
+  {% if payment.method == 'upi_manual' %}
+  <div class="card" style="padding:2rem">
+    <h2 style="font-size:1.1rem;color:var(--clr-plum);margin-bottom:1.5rem;text-align:center">📱 Manual UPI Payment</h2>
+
+    <div class="upi-box" style="margin-bottom:1.5rem">
+      {% if store_settings.upi_qr_code %}
+        <img src="{{ store_settings.upi_qr_code.url }}" alt="UPI QR Code for {{ store_settings.upi_display_name|default:store_settings.store_name }}" class="upi-box__qr">
+      {% else %}
+        <div style="width:200px;height:200px;background:var(--clr-bg-lavender);border-radius:var(--radius-md);margin:0 auto;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem">
+          <span style="font-size:2.5rem" aria-hidden="true">📱</span>
+          <span style="font-size:.8rem;color:var(--clr-text-muted)">QR Code (configure in settings)</span>
+        </div>
+      {% endif %}
+      <p class="upi-box__id">{{ store_settings.upi_id }}</p>
+      <p style="font-size:.85rem;color:var(--clr-text-muted)">{{ store_settings.upi_display_name|default:store_settings.store_name }}</p>
+    </div>
+
+    <div class="alert alert-info" style="margin-bottom:1.5rem">
+      <span>ℹ️</span>
+      <div>
+        <strong>Amount to pay: ₹{{ order.total_amount }}</strong><br>
+        <span style="font-size:.85rem">{{ store_settings.upi_payment_instructions }}</span>
+      </div>
+    </div>
+
+    <!-- UPI transaction form -->
+    <form method="post" action="{% url 'payments:upi_submit' %}" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="order_ref" value="{{ order.reference }}">
+
+      <div class="form-group">
+        <label for="upi_transaction_id" class="form-label">UPI Transaction / Reference ID <span class="req">*</span></label>
+        <input type="text" id="upi_transaction_id" name="upi_transaction_id" class="form-control"
+               required placeholder="e.g. T2412061234567" style="letter-spacing:.04em">
+        <span class="form-hint">Find this in your UPI app's transaction history after payment.</span>
+        {% if errors.upi_transaction_id %}<span class="form-error">{{ errors.upi_transaction_id }}</span>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="upiScreenshot" class="form-label">Payment Screenshot (optional)</label>
+        <input type="file" id="upiScreenshot" name="screenshot" class="form-control"
+               accept="image/jpeg,image/png,image/webp">
+        <span class="form-hint">Upload a screenshot of the successful payment (JPG/PNG, max 5 MB).</span>
+        <div id="upiScreenshotPreview" class="hidden" style="margin-top:.75rem">
+          <img id="" src="" alt="Payment screenshot preview" style="max-width:200px;border-radius:8px;border:2px solid var(--clr-border)">
+        </div>
+      </div>
+
+      <div class="alert alert-warning">
+        <span>⚠️</span>
+        <span>Your order will be marked as <strong>Payment Verification Pending</strong> until we confirm your payment. This usually takes a few hours during business hours.</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Submit Payment Details</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;text-align:center;font-size:.82rem;color:var(--clr-text-muted)">
+    <p>Need help? <a href="{% url 'store:contact' %}">Contact us</a></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if payment.method == 'razorpay' %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endif %}
+{% endblock %}

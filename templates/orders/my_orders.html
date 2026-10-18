@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2rem">
+  <h1 style="font-size:1.8rem;margin-bottom:1.5rem;color:var(--clr-plum)">📦 My Orders</h1>
+
+  {% if orders %}
+    <div style="display:flex;flex-direction:column;gap:1.25rem">
+      {% for order in orders %}
+      <div class="card" style="padding:1.5rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+          <div>
+            <p style="font-weight:700;font-family:var(--font-heading);color:var(--clr-plum)">{{ order.reference }}</p>
+            <p style="font-size:.82rem;color:var(--clr-text-muted)">{{ order.created_at|date:"d M Y" }}</p>
+          </div>
+          <div style="text-align:right">
+            <span class="status-badge status-{{ order.status|slugify }}" style="display:block;margin-bottom:.35rem">{{ order.get_status_display }}</span>
+            <strong style="color:var(--clr-primary)">₹{{ order.total_amount }}</strong>
+          </div>
+        </div>
+
+        <div style="font-size:.88rem;color:var(--clr-text-muted);margin-bottom:1rem">
+          {% for item in order.items.all %}
+            {{ item.product_name }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </div>
+
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <a href="{% url 'orders:track' %}?ref={{ order.reference }}&email={{ order.customer_email }}" class="btn btn-sm btn-outline">Track Order</a>
+          <a href="{% url 'orders:confirmation' order.reference %}" class="btn btn-sm btn-outline">View Details</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state__icon">📦</div>
+      <h2 class="empty-state__title">No orders yet</h2>
+      <p class="empty-state__text">You haven't placed any orders yet. Start exploring our handmade collection!</p>
+      <a href="{% url 'store:shop' %}" class="btn btn-primary">Shop Now 🛍️</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

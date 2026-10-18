@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2.5rem;max-width:800px">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'store:home' %}">Home</a>
+    <span class="breadcrumb__sep">›</span>
+    <span aria-current="page">About Us</span>
+  </nav>
+
+  <div style="text-align:center;margin-bottom:3rem">
+    <span style="font-family:var(--font-script);color:var(--clr-primary);font-size:1.2rem">Our Story</span>
+    <h1 style="font-size:2.2rem;color:var(--clr-plum);margin-top:.4rem">About Vayunandhan Crafts</h1>
+    <div style="width:60px;height:4px;background:var(--clr-primary);border-radius:2px;margin:1rem auto"></div>
+  </div>
+
+  <div class="card" style="padding:2.5rem;margin-bottom:2rem;line-height:1.8;color:var(--clr-text-muted)">
+    <p style="font-size:1.05rem;margin-bottom:1.5rem;color:var(--clr-text)">
+      Welcome to <strong style="color:var(--clr-primary)">Vayunandhan Crafts</strong> — where every piece is made with love, care, and a whole lot of creativity! 🎀
+    </p>
+    <p style="margin-bottom:1.5rem">
+      We are a small handmade business dedicated to creating adorable, high-quality accessories and gifts for girls and women of all ages. From shimmery resin keychains to cute clay charms, from beautiful hair accessories to personalised gift hampers — everything we make is crafted by hand, with heart.
+    </p>
+    <p style="margin-bottom:1.5rem">
+      Our journey began with a simple love for crafting and a desire to create something truly special. We believe that gifts should be personal, meaningful, and beautiful — and that's exactly what we strive for with every item we make.
+    </p>
+    <p>
+      Whether you're looking for a birthday gift, a friendship day surprise, a return gift, or just a treat for yourself — we have something magical waiting for you. Every order is packed with extra love and care, because we want you to feel that warmth when you open it. 💕
+    </p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;margin-bottom:2rem;text-align:center">
+    <div class="card" style="padding:1.5rem">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">🤲</div>
+      <h3 style="font-family:var(--font-heading);color:var(--clr-plum);font-size:1rem;margin-bottom:.4rem">100% Handmade</h3>
+      <p style="font-size:.85rem;color:var(--clr-text-muted)">Every piece is crafted entirely by hand.</p>
+    </div>
+    <div class="card" style="padding:1.5rem">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">✨</div>
+      <h3 style="font-family:var(--font-heading);color:var(--clr-plum);font-size:1rem;margin-bottom:.4rem">Custom Orders</h3>
+      <p style="font-size:.85rem;color:var(--clr-text-muted)">Personalized just for you or your loved one.</p>
+    </div>
+    <div class="card" style="padding:1.5rem">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">💌</div>
+      <h3 style="font-family:var(--font-heading);color:var(--clr-plum);font-size:1rem;margin-bottom:.4rem">Gift Packaging</h3>
+      <p style="font-size:.85rem;color:var(--clr-text-muted)">Beautiful wrapping to make it extra special.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:2rem">
+    <p style="color:var(--clr-text-muted);margin-bottom:1.2rem">Have questions or want to place a custom order?</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="{% url 'store:contact' %}" class="btn btn-primary">Contact Us</a>
+      {% if store_settings.whatsapp_number %}
+        <a href="https://wa.me/{{ store_settings.whatsapp_number }}" class="btn btn-outline" target="_blank" rel="noopener noreferrer" style="border-color:#25d366;color:#25d366">
+          💬 WhatsApp Us
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

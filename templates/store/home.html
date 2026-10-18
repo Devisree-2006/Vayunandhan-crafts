@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}Home{% endblock %}
+{% block meta_description %}Vayunandhan Crafts – Adorable handmade girls accessories, resin keychains, clay charms, scrunchies, hair clips, earrings, and personalised gift hampers. Shop online!{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────────────────────────── -->
+<section class="hero" aria-label="Welcome to Vayunandhan Crafts">
+  <div class="hero__decorations" aria-hidden="true">
+    <span class="hero__deco">🎀</span>
+    <span class="hero__deco">🌸</span>
+    <span class="hero__deco">💝</span>
+    <span class="hero__deco">✨</span>
+    <span class="hero__deco">🌺</span>
+    <span class="hero__deco">🎁</span>
+  </div>
+  <div class="container">
+    <div class="hero__content">
+      <span class="hero__script">Welcome to Vayunandhan Crafts</span>
+      <h1 class="hero__title">Cute Gifts, <em>Handmade</em> with Love 💕</h1>
+      <p class="hero__subtitle">
+        Discover our collection of adorable handcrafted accessories, personalised keychains,
+        charming gift hampers, and more — all made with heart.
+      </p>
+      <div class="hero__cta">
+        <a href="{% url 'store:shop' %}" class="btn btn-primary btn-lg">
+          🛍️ Shop Now
+        </a>
+        <a href="{% url 'store:category' slug='gift-hampers' %}" class="btn btn-outline btn-lg">
+          🎁 Explore Hampers
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Category Strip ─────────────────────────────────────────────────────────── -->
+{% if categories %}
+<section class="section" style="padding-block:2rem" aria-label="Shop by category">
+  <div class="container">
+    <div class="section-header">
+      <span class="script">Browse by</span>
+      <h2>Categories</h2>
+    </div>
+    <div class="category-strip" role="list">
+      {% for cat in categories %}
+      <a href="{{ cat.get_absolute_url }}" class="category-chip" role="listitem">
+        {% if cat.image %}
+          <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-chip__img" loading="lazy">
+        {% else %}
+          <div class="category-chip__img" style="background:var(--clr-bg-lavender);display:flex;align-items:center;justify-content:center;font-size:1.8rem" aria-hidden="true">🎀</div>
+        {% endif %}
+        <span class="category-chip__name">{{ cat.name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Featured Products ───────────────────────────────────────────────────────── -->
+{% if featured_products %}
+<section class="section section--alt" aria-labelledby="featured-heading">
+  <div class="container">
+    <div class="section-header">
+      <span class="script">Handpicked for you</span>
+      <h2 id="featured-heading">Featured Products</h2>
+      <p>Our most-loved pieces, crafted to bring smiles</p>
+    </div>
+    <div class="products-grid">
+      {% for product in featured_products %}
+        {% include 'store/partials/product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'store:shop' %}" class="btn btn-outline">View All Products →</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── New Arrivals ────────────────────────────────────────────────────────────── -->
+{% if new_arrivals %}
+<section class="section" aria-labelledby="new-arrivals-heading">
+  <div class="container">
+    <div class="section-header">
+      <span class="script">Fresh drops ✨</span>
+      <h2 id="new-arrivals-heading">New Arrivals</h2>
+      <p>Just added — be the first to own them</p>
+    </div>
+    <div class="products-grid">
+      {% for product in new_arrivals %}
+        {% include 'store/partials/product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Best Sellers ────────────────────────────────────────────────────────────── -->
+{% if best_sellers %}
+<section class="section section--lavender" aria-labelledby="bestseller-heading">
+  <div class="container">
+    <div class="section-header">
+      <span class="script">Customer favourites 💜</span>
+      <h2 id="bestseller-heading">Best Sellers</h2>
+      <p>These beauties keep flying off the shelves!</p>
+    </div>
+    <div class="products-grid">
+      {% for product in best_sellers %}
+        {% include 'store/partials/product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Gift Hampers by Price ──────────────────────────────────────────────────── -->
+<section class="section section--alt" aria-labelledby="hampers-heading">
+  <div class="container">
+    <div class="section-header">
+      <span class="script">Something for everyone 🎁</span>
+      <h2 id="hampers-heading">Gift Hampers by Budget</h2>
+      <p>Thoughtfully curated hampers — perfect for every occasion</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem">
+      {% for tier in hamper_tiers %}
+      <a href="{{ tier.url }}" class="card" style="padding:1.5rem;text-align:center;text-decoration:none">
+        <div style="font-size:3rem;margin-bottom:.75rem" aria-hidden="true">{{ tier.emoji }}</div>
+        <h3 style="font-family:var(--font-heading);color:var(--clr-plum);margin-bottom:.3rem">{{ tier.label }}</h3>
+        <p style="font-size:.9rem;color:var(--clr-text-muted)">{{ tier.description }}</p>
+        <span class="btn btn-primary btn-sm mt-2">Shop Now</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Why Choose Us ──────────────────────────────────────────────────────────── -->
+<section class="section" aria-labelledby="why-us-heading">
+  <div class="container">
+    <div class="section-header">
+      <span class="script">Why we're special</span>
+      <h2 id="why-us-heading">Made with Love, Delivered with Care</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2rem;text-align:center">
+      <div>
+        <div style="font-size:2.5rem;margin-bottom:.75rem" aria-hidden="true">🤲</div>
+        <h3 style="font-family:var(--font-heading);font-size:1rem;color:var(--clr-plum);margin-bottom:.4rem">100% Handmade</h3>
+        <p style="font-size:.85rem;color:var(--clr-text-muted)">Every piece is crafted by hand with love and attention to detail.</p>
+      </div>
+      <div>
+        <div style="font-size:2.5rem;margin-bottom:.75rem" aria-hidden="true">🚚</div>
+        <h3 style="font-family:var(--font-heading);font-size:1rem;color:var(--clr-plum);margin-bottom:.4rem">Pan-India Delivery</h3>
+        <p style="font-size:.85rem;color:var(--clr-text-muted)">We ship across India. Free delivery on orders above ₹{{ store_settings.free_delivery_above|default:"499" }}.</p>
+      </div>
+      <div>
+        <div style="font-size:2.5rem;margin-bottom:.75rem" aria-hidden="true">✨</div>
+        <h3 style="font-family:var(--font-heading);font-size:1rem;color:var(--clr-plum);margin-bottom:.4rem">Personalised Gifts</h3>
+        <p style="font-size:.85rem;color:var(--clr-text-muted)">Custom names, messages, and designs — truly unique gifts.</p>
+      </div>
+      <div>
+        <div style="font-size:2.5rem;margin-bottom:.75rem" aria-hidden="true">💌</div>
+        <h3 style="font-family:var(--font-heading);font-size:1rem;color:var(--clr-plum);margin-bottom:.4rem">Gift Packaging</h3>
+        <p style="font-size:.85rem;color:var(--clr-text-muted)">Beautiful packaging to make every gift feel extra special.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ────────────────────────────────────────────────────────────── -->
+<section class="section section--lavender" aria-labelledby="testimonials-heading">
+  <div class="container">
+    <div class="section-header">
+      <span class="script">Happy customers 💕</span>
+      <h2 id="testimonials-heading">What Our Customers Say</h2>
+      <p style="font-size:.8rem;color:var(--clr-text-muted)">
+        ⚠️ Demo reviews — real reviews will appear here as customers submit them.
+      </p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem">
+      <div class="testimonial-card">
+        <div class="testimonial-card__stars" aria-label="5 out of 5 stars">★★★★★</div>
+        <p class="testimonial-card__text">"Absolutely love my resin keychain! It's so cute and well-made. The packaging was gorgeous too. Will definitely order again!"</p>
+        <span class="testimonial-card__author">Priya S.
+          <span class="testimonial-card__demo">Demo</span>
+        </span>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-card__stars" aria-label="5 out of 5 stars">★★★★★</div>
+        <p class="testimonial-card__text">"Ordered a custom gift hamper for my best friend's birthday. She was thrilled! The quality and attention to detail is amazing."</p>
+        <span class="testimonial-card__author">Anjali M.
+          <span class="testimonial-card__demo">Demo</span>
+        </span>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-card__stars" aria-label="5 out of 5 stars">★★★★★</div>
+        <p class="testimonial-card__text">"The clay charms are absolutely adorable. Got them as return gifts for my daughter's birthday — all the kids loved them!"</p>
+        <span class="testimonial-card__author">Kavitha R.
+          <span class="testimonial-card__demo">Demo</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

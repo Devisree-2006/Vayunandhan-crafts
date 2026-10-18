@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block dash_title %}Dashboard{% endblock %} – Admin · Vayunandhan Crafts</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="dash-body">
+
+<div class="dash-layout">
+
+  <!-- Sidebar -->
+  <aside class="dash-sidebar" aria-label="Admin navigation">
+    <div class="dash-sidebar__brand">
+      {% if store_settings.logo %}
+        <img src="{{ store_settings.logo.url }}" alt="Vayunandhan Crafts" style="height:38px;border-radius:6px">
+      {% else %}
+        <span style="font-size:1.8rem" aria-hidden="true">🎀</span>
+      {% endif %}
+      <span>Admin</span>
+    </div>
+
+    <nav>
+      <ul class="dash-nav">
+        <li><a href="{% url 'dashboard:home' %}"       class="{% if active_nav == 'home' %}active{% endif %}">📊 Dashboard</a></li>
+        <li><a href="{% url 'dashboard:orders' %}"     class="{% if active_nav == 'orders' %}active{% endif %}">📦 Orders</a></li>
+        <li><a href="{% url 'dashboard:products' %}"   class="{% if active_nav == 'products' %}active{% endif %}">🛍️ Products</a></li>
+        <li><a href="{% url 'dashboard:inventory' %}"  class="{% if active_nav == 'inventory' %}active{% endif %}">📋 Inventory</a></li>
+        <li><a href="{% url 'dashboard:payments' %}"   class="{% if active_nav == 'payments' %}active{% endif %}">💳 Payments</a></li>
+        <li><a href="{% url 'dashboard:earnings' %}"   class="{% if active_nav == 'earnings' %}active{% endif %}">💰 Earnings</a></li>
+        <li><a href="{% url 'dashboard:settings' %}"   class="{% if active_nav == 'settings' %}active{% endif %}">⚙️ Settings</a></li>
+        <li style="margin-top:auto"><a href="{% url 'store:home' %}">🏠 View Store</a></li>
+        <li><a href="{% url 'logout' %}">👋 Logout</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="dash-main">
+    <header class="dash-topbar">
+      <h1 class="dash-topbar__title">{% block dash_title_bar %}Dashboard{% endblock %}</h1>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <span style="font-size:.85rem;color:var(--clr-text-muted)">Hi, {{ user.get_full_name|default:user.username }} 👋</span>
+      </div>
+    </header>
+
+    <!-- Django Messages -->
+    {% if messages %}
+      <div style="padding:0 1.5rem .5rem">
+        {% for msg in messages %}
+          <div class="alert alert-{{ msg.tags|default:'info' }}">
+            <span>{% if msg.tags == 'success' %}✅{% elif msg.tags == 'error' %}❌{% else %}ℹ️{% endif %}</span>
+            <span>{{ msg }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="dash-content">
+      {% block dash_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block dash_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }}{% endblock %}
+{% block meta_description %}{{ product.description|truncatewords:25 }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2rem">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'store:home' %}">Home</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <a href="{% url 'store:shop' %}">Shop</a>
+    {% if product.category %}
+      <span class="breadcrumb__sep" aria-hidden="true">›</span>
+      <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+    {% endif %}
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span aria-current="page">{{ product.name }}</span>
+  </nav>
+
+  <div class="product-detail-grid">
+
+    <!-- ── Gallery ────────────────────────────────────────────────────────────── -->
+    <div>
+      <div class="product-gallery__main">
+        {% with img=product.primary_image %}
+          {% if img %}
+            <img id="galleryMain" src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}">
+          {% else %}
+            <div id="galleryMain" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;background:var(--clr-bg-lavender)" aria-label="No image available">🎀</div>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      {% if product.images.count > 1 %}
+      <div class="product-gallery__thumbs" role="list" aria-label="Product images">
+        {% for img in product.images.all %}
+        <button class="product-gallery__thumb {% if img.is_primary %}active{% endif %}"
+                data-full="{{ img.image.url }}"
+                aria-label="View image {{ forloop.counter }}"
+                role="listitem">
+          <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}">
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ── Info ──────────────────────────────────────────────────────────────── -->
+    <div class="product-info">
+      {% if product.category %}
+        <a href="{{ product.category.get_absolute_url }}" class="product-info__category">{{ product.category.name }}</a>
+      {% endif %}
+
+      <h1 class="product-info__name">{{ product.name }}</h1>
+
+      <!-- Badges -->
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap" aria-label="Product tags">
+        {% if product.is_new_arrival %}<span class="badge badge--new">New Arrival</span>{% endif %}
+        {% if product.is_featured    %}<span class="badge badge--featured">Featured</span>{% endif %}
+        {% if product.discount_percent %}<span class="badge badge--sale">{{ product.discount_percent }}% Off</span>{% endif %}
+      </div>
+
+      <!-- Price -->
+      <div class="product-info__price-row">
+        <span class="product-info__price">₹{{ product.selling_price }}</span>
+        {% if product.original_price and product.original_price > product.selling_price %}
+          <span class="product-info__original">₹{{ product.original_price }}</span>
+          <span class="product-info__discount">{{ product.discount_percent }}% off</span>
+        {% endif %}
+      </div>
+
+      <!-- Stock -->
+      <p style="margin-bottom:1.2rem">
+        {% if product.is_in_stock %}
+          {% if product.is_low_stock %}
+            <span class="product-info__stock-low">⚠️ Only {{ product.stock }} left in stock!</span>
+          {% else %}
+            <span class="product-info__stock-ok">✅ In Stock</span>
+          {% endif %}
+        {% else %}
+          <span class="product-info__stock-oos">❌ Out of Stock</span>
+        {% endif %}
+      </p>
+
+      <!-- Description -->
+      {% if product.description %}
+      <div style="margin-bottom:1.5rem;color:var(--clr-text-muted);font-size:.95rem;line-height:1.7">
+        {{ product.description|linebreaksbr }}
+      </div>
+      {% endif %}
+
+      <!-- Add to Cart -->
+      {% if product.is_in_stock %}
+      <form action="{% url 'orders:add_to_cart' product.pk %}" method="post" class="add-to-cart-form">
+        {% csrf_token %}
+        <div class="flex items-center gap-2 mb-2" style="margin-bottom:1rem">
+          <label for="quantity" class="form-label" style="margin-bottom:0;white-space:nowrap">Quantity:</label>
+          <div class="qty-control">
+            <button type="button" class="qty-btn" onclick="changeQty(-1)" aria-label="Decrease quantity">−</button>
+            <input type="number" id="quantity" name="quantity"
+                   value="1" min="1" max="{{ product.stock }}"
+                   class="qty-input" aria-label="Product quantity"
+                   oninput="validateQty(this, {{ product.stock }})">
+            <button type="button" class="qty-btn" onclick="changeQty(1)" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <button type="submit" class="btn btn-primary btn-lg" style="flex:1">
+            🛒 Add to Cart
+          </button>
+          <a href="{% url 'orders:cart' %}" class="btn btn-outline btn-lg">View Cart</a>
+        </div>
+      </form>
+      {% else %}
+        <div class="alert alert-warning">
+          <span>🛑</span>
+          <span>This product is currently out of stock. Check back soon!</span>
+        </div>
+        <a href="{% url 'store:shop' %}" class="btn btn-outline">Browse Other Products</a>
+      {% endif %}
+
+      <!-- SKU & Details -->
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--clr-border);font-size:.82rem;color:var(--clr-text-muted)">
+        <p><strong>SKU:</strong> {{ product.sku }}</p>
+        {% if product.category %}<p><strong>Category:</strong> {{ product.category.name }}</p>{% endif %}
+      </div>
+
+      <!-- WhatsApp enquiry -->
+      {% if store_settings.whatsapp_number %}
+      <div style="margin-top:1rem">
+        <a href="https://wa.me/{{ store_settings.whatsapp_number }}?text=Hi!%20I'm%20interested%20in%20{{ product.name|urlencode }}%20(SKU:%20{{ product.sku }})."
+           class="btn btn-sm" style="background:#25d366;color:#fff;border-color:#25d366"
+           target="_blank" rel="noopener noreferrer">
+          💬 WhatsApp to Enquire
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Related Products ────────────────────────────────────────────────────── -->
+  {% if related_products %}
+  <section style="margin-top:4rem" aria-labelledby="related-heading">
+    <div class="section-header">
+      <span class="script">You might also like</span>
+      <h2 id="related-heading">Related Products</h2>
+    </div>
+    <div class="products-grid">
+      {% for p in related_products %}
+        {% include 'store/partials/product_card.html' with product=p %}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+function changeQty(delta) {
+  const input = document.getElementById('quantity');
+  const max = parseInt(input.max);
+  let val = parseInt(input.value) + delta;
+  if (val < 1) val = 1;
+  if (val > max) val = max;
+  input.value = val;
+}
+function validateQty(input, max) {
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 1) input.value = 1;
+  if (val > max) { input.value = max; showToast('Maximum ' + max + ' units available', 'warning'); }
+}
+</script>
+{% endblock %}
+{% endblock %}

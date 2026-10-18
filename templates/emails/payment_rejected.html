@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Payment Not Verified – {{ order.reference }}</title>
+<style>
+  body{margin:0;padding:0;background:#f9f0f3;font-family:Arial,sans-serif;color:#3d2030}
+  .wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(232,100,122,.12)}
+  .header{background:#c62828;padding:2rem;text-align:center;color:#fff}
+  .body{padding:2rem}
+  .alert{background:#ffebee;border-left:4px solid #ef5350;padding:1rem;border-radius:8px;margin:1rem 0;font-size:.9rem;color:#b71c1c}
+  .footer{background:#4a2040;color:rgba(255,255,255,.65);padding:1.25rem;text-align:center;font-size:.8rem}
+  .footer a{color:#f48fb1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    {% if logo_url %}<img src="{{ logo_url }}" alt="{{ store_name }}" style="height:46px;border-radius:8px">{% endif %}
+    <h1 style="margin:.75rem 0 0;font-size:1.4rem">Payment Could Not Be Verified ❌</h1>
+  </div>
+  <div class="body">
+    <p>Hi <strong>{{ order.customer_name }}</strong>,</p>
+    <div class="alert">
+      ❌ We were unable to verify your UPI payment for Order <strong>{{ order.reference }}</strong>.<br><br>
+      Your order has been cancelled and any stock has been released.
+    </div>
+    <p style="font-size:.9rem;color:#8a6070">
+      If you believe this is an error, please contact us immediately via WhatsApp or email with your
+      UPI transaction screenshot and we'll resolve it for you.
+    </p>
+    <p style="font-size:.85rem;color:#8a6070;margin-top:1.5rem">Contact: {{ store_phone }}</p>
+  </div>
+  <div class="footer">© {{ store_name }} · <a href="{{ store_url }}">Visit Store</a></div>
+</div>
+</body>
+</html>

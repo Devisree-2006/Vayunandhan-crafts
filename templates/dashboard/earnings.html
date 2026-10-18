@@ -1,0 +1,72 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block dash_title %}Earnings{% endblock %}
+{% block dash_title_bar %}💰 Earnings & Revenue{% endblock %}
+
+{% block dash_content %}
+<div class="dash-stats" style="margin-bottom:1.5rem">
+  <div class="dash-card dash-card--green"><div class="dash-card__label">Today</div><div class="dash-card__value">₹{{ revenue.today|floatformat:0|intcomma }}</div></div>
+  <div class="dash-card dash-card--green"><div class="dash-card__label">This Week</div><div class="dash-card__value">₹{{ revenue.week|floatformat:0|intcomma }}</div></div>
+  <div class="dash-card dash-card--green"><div class="dash-card__label">This Month</div><div class="dash-card__value">₹{{ revenue.month|floatformat:0|intcomma }}</div></div>
+  <div class="dash-card dash-card--purple"><div class="dash-card__label">Total Revenue</div><div class="dash-card__value">₹{{ revenue.total|floatformat:0|intcomma }}</div><div class="dash-card__sub">Verified only</div></div>
+  <div class="dash-card" style="border-top:4px solid #ef5350"><div class="dash-card__label">Refunds</div><div class="dash-card__value">₹{{ refund_total|floatformat:0|intcomma }}</div></div>
+  <div class="dash-card"><div class="dash-card__label">Paid Orders</div><div class="dash-card__value">{{ order_count }}</div><div class="dash-card__sub">Avg ₹{{ avg_value|floatformat:0 }}</div></div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem">
+  <div class="dash-card" style="padding:1.5rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <h2 style="font-size:1rem;color:var(--clr-plum)">Monthly Revenue (Last 6 Months)</h2>
+      <a href="{% url 'dashboard:export_csv' %}" class="btn btn-sm btn-outline">⬇ Export CSV</a>
+    </div>
+    <canvas id="monthlyChart" height="120"></canvas>
+  </div>
+
+  <div class="dash-table-wrap">
+    <div class="dash-table-header"><span class="dash-table-title">Top Products</span></div>
+    <table>
+      <thead><tr><th>Product</th><th>Sold</th></tr></thead>
+      <tbody>
+        {% for p in top_products %}
+        <tr>
+          <td style="font-size:.85rem">{{ p.product_name }}</td>
+          <td style="font-weight:700;color:var(--clr-primary)">{{ p.total_qty }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="text-align:center;padding:1.5rem;color:var(--clr-text-muted)">No data yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="dash-card" style="padding:1.5rem;margin-top:1.5rem">
+  <h2 style="font-size:1rem;margin-bottom:1rem;color:var(--clr-plum)">Orders by Status</h2>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+    {% for sc in status_counts %}
+    <span style="background:var(--clr-bg-soft);padding:.4rem .9rem;border-radius:var(--radius-pill);font-size:.82rem"><strong>{{ sc.count }}</strong> {{ sc.status }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<p style="font-size:.8rem;color:var(--clr-text-muted);margin-top:1rem;padding:.75rem 1rem;background:var(--clr-bg-lavender);border-radius:var(--radius-md)">
+  ℹ️ Revenue shows verified payments only. Pending, failed, and unverified payments are excluded. To calculate profit, enter cost prices for all products.
+</p>
+{% endblock %}
+
+{% block dash_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('monthlyChart'), {
+  type: 'line',
+  data: {
+    labels: {{ chart_labels|safe }},
+    datasets: [{ label: 'Revenue (₹)', data: {{ chart_data|safe }},
+      borderColor: '#e8647a', backgroundColor: 'rgba(232,100,122,0.1)',
+      borderWidth: 2, tension: 0.4, fill: true, pointBackgroundColor: '#e8647a' }]
+  },
+  options: { responsive:true, plugins:{legend:{display:false}},
+    scales:{ y:{ beginAtZero:true, ticks:{ callback: v => '₹'+v }}} }
+});
+</script>
+{% endblock %}

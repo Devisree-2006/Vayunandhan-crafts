@@ -1,0 +1,66 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block dash_title %}Settings{% endblock %}
+{% block dash_title_bar %}⚙️ Store Settings{% endblock %}
+
+{% block dash_content %}
+<div style="max-width:800px">
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+
+    <div class="dash-card" style="padding:1.5rem">
+      <h3 style="font-size:.95rem;margin-bottom:1rem;color:var(--clr-plum)">Store Identity</h3>
+      <div class="form-group"><label class="form-label">Store Name</label><input type="text" name="store_name" class="form-control" value="{{ store.store_name }}"></div>
+      <div class="form-group"><label class="form-label">Tagline</label><input type="text" name="tagline" class="form-control" value="{{ store.tagline }}"></div>
+      <div class="form-group">
+        <label class="form-label">Logo</label>
+        {% if store.logo %}<img src="{{ store.logo.url }}" alt="Logo" style="height:44px;border-radius:6px;display:block;margin-bottom:.5rem">{% endif %}
+        <input type="file" name="logo" class="form-control" accept="image/*">
+        <span class="form-hint">JPG/PNG, max 5 MB</span>
+      </div>
+    </div>
+
+    <div class="dash-card" style="padding:1.5rem">
+      <h3 style="font-size:.95rem;margin-bottom:1rem;color:var(--clr-plum)">Contact & Social</h3>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="{{ store.email }}"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="{{ store.phone }}"></div>
+      <div class="form-group"><label class="form-label">WhatsApp Number <span class="form-hint" style="display:inline">(91XXXXXXXXXX)</span></label><input type="text" name="whatsapp_number" class="form-control" value="{{ store.whatsapp_number }}" placeholder="91XXXXXXXXXX"></div>
+      <div class="form-group"><label class="form-label">Instagram URL</label><input type="url" name="instagram_url" class="form-control" value="{{ store.instagram_url }}"></div>
+      <div class="form-group"><label class="form-label">Facebook URL</label><input type="url" name="facebook_url" class="form-control" value="{{ store.facebook_url }}"></div>
+      <div class="form-group"><label class="form-label">Address</label><textarea name="address" class="form-control" rows="2">{{ store.address }}</textarea></div>
+    </div>
+
+    <div class="dash-card" style="padding:1.5rem">
+      <h3 style="font-size:.95rem;margin-bottom:1rem;color:var(--clr-plum)">Delivery Charges</h3>
+      <div class="form-group"><label class="form-label">Delivery Charge (₹)</label><input type="number" name="delivery_charge" class="form-control" value="{{ store.delivery_charge }}" step="0.01" min="0"></div>
+      <div class="form-group"><label class="form-label">Free Delivery Above (₹)</label><input type="number" name="free_delivery_above" class="form-control" value="{{ store.free_delivery_above }}" step="0.01" min="0"><span class="form-hint">Set 0 to always charge.</span></div>
+    </div>
+
+    <div class="dash-card" style="padding:1.5rem">
+      <h3 style="font-size:.95rem;margin-bottom:1rem;color:var(--clr-plum)">UPI Payment</h3>
+      <div class="form-group"><label class="form-label">UPI ID</label><input type="text" name="upi_id" class="form-control" value="{{ store.upi_id }}" placeholder="yourname@upi"></div>
+      <div class="form-group"><label class="form-label">Display Name</label><input type="text" name="upi_display_name" class="form-control" value="{{ store.upi_display_name }}"></div>
+      <div class="form-group">
+        <label class="form-label">UPI QR Code</label>
+        {% if store.upi_qr_code %}<img src="{{ store.upi_qr_code.url }}" alt="QR" style="width:100px;border-radius:8px;display:block;margin-bottom:.5rem">{% endif %}
+        <input type="file" name="upi_qr_code" class="form-control" accept="image/*">
+      </div>
+      <div class="form-group"><label class="form-label">Payment Instructions</label><textarea name="upi_payment_instructions" class="form-control" rows="3">{{ store.upi_payment_instructions }}</textarea></div>
+    </div>
+  </div>
+
+  <div class="dash-card" style="padding:1.5rem;margin-top:1.5rem">
+    <h3 style="font-size:.95rem;margin-bottom:1rem;color:var(--clr-plum)">WhatsApp Notification Toggles</h3>
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <label style="display:flex;align-items:center;gap:.75rem;font-size:.9rem;cursor:pointer"><input type="checkbox" name="notify_order_created"     {% if store.notify_order_created %}checked{% endif %}     style="accent-color:var(--clr-primary);width:17px;height:17px"> Notify on new order placed</label>
+      <label style="display:flex;align-items:center;gap:.75rem;font-size:.9rem;cursor:pointer"><input type="checkbox" name="notify_payment_confirmed" {% if store.notify_payment_confirmed %}checked{% endif %} style="accent-color:var(--clr-primary);width:17px;height:17px"> Notify on payment confirmed</label>
+      <label style="display:flex;align-items:center;gap:.75rem;font-size:.9rem;cursor:pointer"><input type="checkbox" name="notify_order_dispatched"  {% if store.notify_order_dispatched %}checked{% endif %}  style="accent-color:var(--clr-primary);width:17px;height:17px"> Notify on order dispatched</label>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem">
+    <button type="submit" class="btn btn-primary btn-lg">Save Settings</button>
+  </div>
+</form>
+</div>
+{% endblock %}

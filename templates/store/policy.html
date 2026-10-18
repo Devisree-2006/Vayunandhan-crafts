@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2.5rem;max-width:780px">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'store:home' %}">Home</a>
+    <span class="breadcrumb__sep">›</span>
+    <span aria-current="page">{{ page_title }}</span>
+  </nav>
+
+  <h1 style="font-size:2rem;color:var(--clr-plum);margin-bottom:2rem">{{ page_title }}</h1>
+
+  <div class="card" style="padding:2rem;line-height:1.85;color:var(--clr-text-muted)">
+    {{ content|safe }}
+  </div>
+
+  <div style="margin-top:1.5rem;text-align:center">
+    <a href="{% url 'store:contact' %}" class="btn btn-outline">Questions? Contact Us</a>
+  </div>
+</div>
+{% endblock %}

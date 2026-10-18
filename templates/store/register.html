@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:2rem">
+  <div style="width:100%;max-width:480px">
+    <div style="text-align:center;margin-bottom:2rem">
+      {% if store_settings.logo %}
+        <img src="{{ store_settings.logo.url }}" alt="{{ store_settings.store_name }}" style="height:52px;margin:0 auto 1rem;border-radius:8px">
+      {% else %}
+        <div style="font-size:3rem;margin-bottom:.75rem">🎀</div>
+      {% endif %}
+      <h1 style="font-size:1.8rem;color:var(--clr-plum)">Create Account</h1>
+      <p style="color:var(--clr-text-muted)">Join {{ store_settings.store_name }} for a better shopping experience</p>
+    </div>
+
+    <div class="card" style="padding:2rem">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}" class="form-label">
+              {{ field.label }}{% if field.field.required %} <span class="req">*</span>{% endif %}
+            </label>
+            <input
+              type="{% if field.field.widget.input_type %}{{ field.field.widget.input_type }}{% else %}text{% endif %}"
+              id="{{ field.id_for_label }}"
+              name="{{ field.html_name }}"
+              class="form-control"
+              value="{% if field.value %}{{ field.value }}{% endif %}"
+              {% if field.field.required %}required{% endif %}
+              autocomplete="{{ field.html_name }}"
+              placeholder="{{ field.label }}"
+            >
+            {% if field.errors %}
+              {% for err in field.errors %}
+                <span class="form-error">{{ err }}</span>
+              {% endfor %}
+            {% endif %}
+            {% if field.help_text %}
+              <span class="form-hint">{{ field.help_text }}</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:.5rem">Create Account 🎀</button>
+      </form>
+
+      <p style="text-align:center;margin-top:1.25rem;font-size:.88rem;color:var(--clr-text-muted)">
+        Already have an account? <a href="{% url 'login' %}" style="color:var(--clr-primary);font-weight:700">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

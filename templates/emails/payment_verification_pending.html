@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Payment Pending – {{ order.reference }}</title>
+<style>
+  body{margin:0;padding:0;background:#f9f0f3;font-family:Arial,sans-serif;color:#3d2030}
+  .wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(232,100,122,.12)}
+  .header{background:linear-gradient(135deg,#e8647a,#b39ddb);padding:2rem;text-align:center;color:#fff}
+  .header h1{margin:.75rem 0 0;font-size:1.4rem}
+  .body{padding:2rem}
+  .alert{background:#fff8e1;border-left:4px solid #ffa000;padding:1rem;border-radius:8px;margin:1rem 0;font-size:.9rem}
+  .footer{background:#4a2040;color:rgba(255,255,255,.65);padding:1.25rem;text-align:center;font-size:.8rem}
+  .footer a{color:#f48fb1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    {% if logo_url %}<img src="{{ logo_url }}" alt="{{ store_name }}" style="height:46px;border-radius:8px">{% else %}<span style="font-size:2rem">🎀</span>{% endif %}
+    <h1>Payment Received ⏳</h1>
+  </div>
+  <div class="body">
+    <p>Hi <strong>{{ order.customer_name }}</strong>! 💕</p>
+    <p>Thank you for your payment. We've received your UPI transaction details and will verify them shortly.</p>
+    <div class="alert">
+      ⏳ <strong>Your order is pending payment verification.</strong><br>
+      We'll confirm your order as soon as we verify your payment. This usually takes a few hours during business hours.<br><br>
+      <strong>Order ID:</strong> {{ order.reference }}<br>
+      <strong>Amount:</strong> ₹{{ order.total_amount }}
+    </div>
+    <p style="font-size:.88rem;color:#8a6070">You'll receive another email once your payment is verified and your order is confirmed.</p>
+    <p style="font-size:.85rem;color:#8a6070;margin-top:1.5rem">Questions? Contact us at {{ store_phone }}</p>
+  </div>
+  <div class="footer">© {{ store_name }} · <a href="{{ store_url }}">Visit Store</a></div>
+</div>
+</body>
+</html>

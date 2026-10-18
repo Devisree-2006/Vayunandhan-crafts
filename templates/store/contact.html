@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:2.5rem;max-width:900px">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'store:home' %}">Home</a>
+    <span class="breadcrumb__sep">›</span>
+    <span aria-current="page">Contact Us</span>
+  </nav>
+
+  <div style="text-align:center;margin-bottom:2.5rem">
+    <span style="font-family:var(--font-script);color:var(--clr-primary);font-size:1.2rem">We'd love to hear from you</span>
+    <h1 style="font-size:2rem;color:var(--clr-plum);margin-top:.4rem">Contact Us 💌</h1>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start">
+
+    <!-- Contact Form -->
+    <div class="card" style="padding:2rem">
+      <h2 style="font-size:1.2rem;margin-bottom:1.5rem;color:var(--clr-plum)">Send us a message</h2>
+
+      {% if form_success %}
+        <div class="alert alert-success">
+          <span>✅</span>
+          <span>Thank you! Your message has been sent. We'll get back to you soon. 💕</span>
+        </div>
+      {% else %}
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="contact_name" class="form-label">Your Name <span class="req">*</span></label>
+            <input type="text" id="contact_name" name="name" class="form-control" required
+                   value="{{ form_data.name|default:'' }}" placeholder="Your full name">
+            {% if form_errors.name %}<span class="form-error">{{ form_errors.name }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="contact_email" class="form-label">Email Address <span class="req">*</span></label>
+            <input type="email" id="contact_email" name="email" class="form-control" required
+                   value="{{ form_data.email|default:'' }}" placeholder="you@example.com">
+            {% if form_errors.email %}<span class="form-error">{{ form_errors.email }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="contact_phone" class="form-label">Phone / WhatsApp</label>
+            <input type="tel" id="contact_phone" name="phone" class="form-control"
+                   value="{{ form_data.phone|default:'' }}" placeholder="+91 XXXXX XXXXX">
+          </div>
+          <div class="form-group">
+            <label for="contact_subject" class="form-label">Subject <span class="req">*</span></label>
+            <input type="text" id="contact_subject" name="subject" class="form-control" required
+                   value="{{ form_data.subject|default:'' }}" placeholder="What is this about?">
+            {% if form_errors.subject %}<span class="form-error">{{ form_errors.subject }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="contact_message" class="form-label">Message <span class="req">*</span></label>
+            <textarea id="contact_message" name="message" class="form-control" rows="5" required
+                      placeholder="Write your message here…">{{ form_data.message|default:'' }}</textarea>
+            {% if form_errors.message %}<span class="form-error">{{ form_errors.message }}</span>{% endif %}
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Send Message 💌</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <!-- Contact Info -->
+    <div>
+      <div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
+        <h2 style="font-size:1.1rem;margin-bottom:1.25rem;color:var(--clr-plum)">Get in Touch</h2>
+        {% if store_settings.email %}
+        <div style="display:flex;gap:.75rem;margin-bottom:1rem;align-items:flex-start">
+          <span style="font-size:1.3rem">✉️</span>
+          <div>
+            <p style="font-weight:700;font-size:.88rem;color:var(--clr-plum);margin-bottom:.1rem">Email</p>
+            <a href="mailto:{{ store_settings.email }}" style="font-size:.9rem;color:var(--clr-text-muted)">{{ store_settings.email }}</a>
+          </div>
+        </div>
+        {% endif %}
+        {% if store_settings.whatsapp_number %}
+        <div style="display:flex;gap:.75rem;margin-bottom:1rem;align-items:flex-start">
+          <span style="font-size:1.3rem">💬</span>
+          <div>
+            <p style="font-weight:700;font-size:.88rem;color:var(--clr-plum);margin-bottom:.1rem">WhatsApp</p>
+            <a href="https://wa.me/{{ store_settings.whatsapp_number }}" target="_blank" rel="noopener noreferrer" style="font-size:.9rem;color:var(--clr-text-muted)">Chat with us on WhatsApp</a>
+          </div>
+        </div>
+        {% endif %}
+        {% if store_settings.phone %}
+        <div style="display:flex;gap:.75rem;margin-bottom:1rem;align-items:flex-start">
+          <span style="font-size:1.3rem">📞</span>
+          <div>
+            <p style="font-weight:700;font-size:.88rem;color:var(--clr-plum);margin-bottom:.1rem">Phone</p>
+            <p style="font-size:.9rem;color:var(--clr-text-muted)">{{ store_settings.phone }}</p>
+          </div>
+        </div>
+        {% endif %}
+        {% if store_settings.instagram_url %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start">
+          <span style="font-size:1.3rem">📸</span>
+          <div>
+            <p style="font-weight:700;font-size:.88rem;color:var(--clr-plum);margin-bottom:.1rem">Instagram</p>
+            <a href="{{ store_settings.instagram_url }}" target="_blank" rel="noopener noreferrer" style="font-size:.9rem;color:var(--clr-primary)">Follow us on Instagram</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="card" style="padding:1.5rem;background:var(--clr-bg-soft)">
+        <h3 style="font-size:1rem;margin-bottom:.75rem;color:var(--clr-plum)">💡 For Custom Orders</h3>
+        <p style="font-size:.88rem;color:var(--clr-text-muted)">
+          Want something personalised? Send us a WhatsApp message with your requirements and we'll get back to you within 24 hours with a quote!
+        </p>
+        {% if store_settings.whatsapp_number %}
+        <a href="https://wa.me/{{ store_settings.whatsapp_number }}?text=Hi!%20I%20want%20to%20place%20a%20custom%20order."
+           class="btn btn-sm mt-2" style="background:#25d366;color:#fff;border-color:#25d366"
+           target="_blank" rel="noopener noreferrer">
+          💬 Custom Order on WhatsApp
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Order Delivered – {{ order.reference }}</title>
+<style>
+  body{margin:0;padding:0;background:#f9f0f3;font-family:Arial,sans-serif;color:#3d2030}
+  .wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(232,100,122,.12)}
+  .header{background:linear-gradient(135deg,#2e7d32,#66bb6a);padding:2rem;text-align:center;color:#fff}
+  .body{padding:2rem}
+  .btn{display:inline-block;background:#e8647a;color:#fff;padding:.65rem 1.5rem;border-radius:999px;text-decoration:none;font-weight:700}
+  .footer{background:#4a2040;color:rgba(255,255,255,.65);padding:1.25rem;text-align:center;font-size:.8rem}
+  .footer a{color:#f48fb1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    {% if logo_url %}<img src="{{ logo_url }}" alt="{{ store_name }}" style="height:46px;border-radius:8px">{% endif %}
+    <h1 style="margin:.75rem 0 0;font-size:1.4rem">Your Order Has Been Delivered! 🎉</h1>
+  </div>
+  <div class="body">
+    <p>Hi <strong>{{ order.customer_name }}</strong>! 💕</p>
+    <p>Your order <strong>{{ order.reference }}</strong> has been delivered. We hope you love your handmade treasures!</p>
+    <p style="margin:1.5rem 0;font-size:.9rem;color:#8a6070">
+      If you have any questions or concerns about your order, please don't hesitate to reach out to us.
+    </p>
+    <div style="text-align:center;margin:1.5rem 0">
+      <a href="{{ store_url }}" class="btn">Shop Again 🛍️</a>
+    </div>
+    <p style="font-size:.82rem;color:#b08090;text-align:center">Thank you for choosing {{ store_name }}! 💜</p>
+  </div>
+  <div class="footer">© {{ store_name }} · <a href="{{ store_url }}">Visit Store</a></div>
+</div>
+</body>
+</html>

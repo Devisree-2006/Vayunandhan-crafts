@@ -1,0 +1,141 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block dash_title %}Order {{ order.reference }}{% endblock %}
+{% block dash_title_bar %}Order {{ order.reference }}{% endblock %}
+
+{% block dash_content %}
+<div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start">
+
+  <!-- Left column -->
+  <div>
+    <!-- Items + totals -->
+    <div class="dash-card" style="padding:1.5rem;margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem">
+        <div>
+          <h2 style="font-size:1.2rem;color:var(--clr-plum);margin-bottom:.2rem">{{ order.reference }}</h2>
+          <p style="font-size:.82rem;color:var(--clr-text-muted)">{{ order.created_at|date:"d M Y, g:i A" }}</p>
+        </div>
+        <span class="status-badge status-{{ order.status|slugify }}">{{ order.get_status_display }}</span>
+      </div>
+
+      {% for item in order.items.all %}
+      <div style="display:flex;justify-content:space-between;font-size:.88rem;padding:.4rem 0;border-bottom:1px dashed var(--clr-border)">
+        <span>{{ item.product_name }} × {{ item.quantity }}</span><strong>₹{{ item.subtotal }}</strong>
+      </div>
+      {% endfor %}
+
+      <div style="margin-top:.75rem;font-size:.88rem">
+        <div style="display:flex;justify-content:space-between;padding:.3rem 0"><span style="color:var(--clr-text-muted)">Subtotal</span><span>₹{{ order.subtotal }}</span></div>
+        {% if order.discount_amount > 0 %}<div style="display:flex;justify-content:space-between;padding:.3rem 0;color:var(--clr-primary)"><span>Discount</span><span>−₹{{ order.discount_amount }}</span></div>{% endif %}
+        <div style="display:flex;justify-content:space-between;padding:.3rem 0"><span style="color:var(--clr-text-muted)">Delivery</span><span>{% if order.delivery_charge == 0 %}FREE{% else %}₹{{ order.delivery_charge }}{% endif %}</span></div>
+        <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1rem;padding:.5rem 0;border-top:2px solid var(--clr-border);margin-top:.3rem">
+          <span style="color:var(--clr-plum)">Total</span><span style="color:var(--clr-primary)">₹{{ order.total_amount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer + address -->
+    <div class="dash-card" style="padding:1.5rem;margin-bottom:1.5rem">
+      <h3 style="font-size:.9rem;margin-bottom:.75rem;color:var(--clr-plum)">Customer & Delivery</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:.88rem">
+        <div>
+          <p style="font-weight:700">{{ order.customer_name }}</p>
+          <p style="color:var(--clr-text-muted)">{{ order.customer_email }}</p>
+          <p style="color:var(--clr-text-muted)">{{ order.customer_phone }}</p>
+        </div>
+        <div style="color:var(--clr-text-muted)">
+          {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}<br>
+          {{ order.city }}, {{ order.state }} – {{ order.pincode }}
+          {% if order.delivery_instructions %}<br><em>{{ order.delivery_instructions }}</em>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipment -->
+    <div class="dash-card" style="padding:1.5rem;margin-bottom:1.5rem">
+      <h3 style="font-size:.9rem;margin-bottom:1rem;color:var(--clr-plum)">🚚 Shipment</h3>
+      <form method="post" action="{% url 'dashboard:update_shipment' order.reference %}">
+        {% csrf_token %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div class="form-group"><label class="form-label">Courier</label><input type="text" name="courier_name" class="form-control" value="{{ shipment.courier_name }}"></div>
+          <div class="form-group"><label class="form-label">AWB / Tracking No.</label><input type="text" name="awb_number" class="form-control" value="{{ shipment.awb_number }}"></div>
+          <div class="form-group" style="grid-column:1/-1"><label class="form-label">Tracking URL</label><input type="url" name="tracking_url" class="form-control" value="{{ shipment.tracking_url }}"></div>
+          <div class="form-group"><label class="form-label">Dispatch Date</label><input type="date" name="dispatch_date" class="form-control" value="{{ shipment.dispatch_date|date:'Y-m-d' }}"></div>
+          <div class="form-group"><label class="form-label">Delivery Date</label><input type="date" name="delivery_date" class="form-control" value="{{ shipment.delivery_date|date:'Y-m-d' }}"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Save Shipment</button>
+      </form>
+    </div>
+
+    <!-- Timeline -->
+    <div class="dash-card" style="padding:1.5rem">
+      <h3 style="font-size:.9rem;margin-bottom:1rem;color:var(--clr-plum)">📋 Order Timeline</h3>
+      <div class="order-timeline">
+        {% for h in history %}
+        <div class="timeline-step done">
+          <div class="timeline-step__dot"></div>
+          <p class="timeline-step__label">{{ h.to_status }}</p>
+          <p class="timeline-step__date">{{ h.created_at|date:"d M Y, g:i A" }}{% if h.changed_by %} · {{ h.changed_by.get_full_name|default:h.changed_by.username }}{% endif %}</p>
+          {% if h.note %}<p style="font-size:.8rem;color:var(--clr-text-muted);margin-top:.15rem">{{ h.note }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right sidebar -->
+  <div>
+    <!-- Update status -->
+    <div class="dash-card" style="padding:1.5rem;margin-bottom:1.5rem">
+      <h3 style="font-size:.9rem;margin-bottom:1rem;color:var(--clr-plum)">Update Status</h3>
+      <form method="post" action="{% url 'dashboard:update_order_status' order.reference %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">New Status</label>
+          <select name="new_status" class="form-control">
+            {% for val, label in status_choices %}{% if val in allowed_next %}<option value="{{ val }}">{{ label }}</option>{% endif %}{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <textarea name="note" class="form-control" rows="2" placeholder="Internal note (optional)…"></textarea>
+        </div>
+        {% if allowed_next %}
+          <button type="submit" class="btn btn-primary btn-sm btn-block">Update Status</button>
+        {% else %}
+          <p style="font-size:.82rem;color:var(--clr-text-muted);text-align:center">No further transitions available.</p>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- Payment -->
+    {% if payment %}
+    <div class="dash-card" style="padding:1.5rem">
+      <h3 style="font-size:.9rem;margin-bottom:.75rem;color:var(--clr-plum)">💳 Payment</h3>
+      <p style="font-size:.88rem"><strong>Method:</strong> {{ payment.get_method_display }}</p>
+      <p style="font-size:.88rem"><strong>Amount:</strong> ₹{{ payment.amount }}</p>
+      <p style="font-size:.88rem"><strong>Status:</strong>
+        <span class="status-badge {% if payment.status == 'verified' %}status-verified{% elif payment.status == 'failed' %}status-cancelled{% else %}status-pending{% endif %}">{{ payment.get_status_display }}</span>
+      </p>
+      {% if payment.verified_at %}<p style="font-size:.78rem;color:var(--clr-text-muted);margin-top:.3rem">Verified: {{ payment.verified_at|date:"d M Y, g:i A" }}</p>{% endif %}
+      {% if payment.razorpay_payment_id %}<p style="font-size:.72rem;color:var(--clr-text-muted);word-break:break-all;margin-top:.2rem">ID: {{ payment.razorpay_payment_id }}</p>{% endif %}
+
+      {% if payment.method == 'upi_manual' and payment.status == 'verification_pending' %}
+      <hr style="margin:.75rem 0;border-color:var(--clr-border)">
+      {% if payment.upi_detail %}
+        <p style="font-size:.85rem;margin-bottom:.4rem"><strong>UPI Txn ID:</strong> {{ payment.upi_detail.upi_transaction_id }}</p>
+        {% if payment.upi_detail.screenshot %}<img src="{{ payment.upi_detail.screenshot.url }}" alt="Payment screenshot" style="max-width:100%;border-radius:8px;margin-bottom:.75rem">{% endif %}
+      {% endif %}
+      <form method="post" action="{% url 'dashboard:verify_upi_payment' payment.pk %}">
+        {% csrf_token %}
+        <textarea name="note" class="form-control" rows="2" placeholder="Admin note…" style="margin-bottom:.5rem;font-size:.85rem"></textarea>
+        <div style="display:flex;gap:.4rem">
+          <button name="action" value="approve" class="btn btn-sm btn-block" style="background:#4caf50;color:#fff;border-color:#4caf50">✓ Approve</button>
+          <button name="action" value="reject"  class="btn btn-sm btn-block" style="background:#ef5350;color:#fff;border-color:#ef5350">✕ Reject</button>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

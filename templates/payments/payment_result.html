@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Payment {{ result|title }} – {{ order.reference }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-block:3rem;max-width:600px;text-align:center">
+  {% if result == 'success' %}
+    <div style="font-size:4rem;margin-bottom:1rem" aria-hidden="true">✅</div>
+    <h1 style="color:#2e7d32;margin-bottom:.5rem">Payment Successful!</h1>
+    <p style="color:var(--clr-text-muted)">Your payment has been verified. Thank you for shopping with us! 💕</p>
+  {% elif result == 'pending' %}
+    <div style="font-size:4rem;margin-bottom:1rem" aria-hidden="true">⏳</div>
+    <h1 style="color:#e65100;margin-bottom:.5rem">Payment Pending</h1>
+    <p style="color:var(--clr-text-muted)">We're still processing your payment. Please check back later or contact us if this takes too long.</p>
+  {% else %}
+    <div style="font-size:4rem;margin-bottom:1rem" aria-hidden="true">❌</div>
+    <h1 style="color:#c62828;margin-bottom:.5rem">Payment Failed</h1>
+    <p style="color:var(--clr-text-muted)">{{ message|default:"Your payment could not be processed. Please try again or contact us." }}</p>
+  {% endif %}
+
+  <p style="margin-top:1rem;margin-bottom:2rem;font-weight:700;color:var(--clr-primary)">
+    Order ID: {{ order.reference }}
+  </p>
+
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    {% if result == 'success' %}
+      <a href="{% url 'orders:confirmation' order.reference %}" class="btn btn-primary">View Order Confirmation</a>
+    {% else %}
+      <a href="{% url 'payments:payment_page' order.reference %}" class="btn btn-primary">Try Again</a>
+    {% endif %}
+    <a href="{% url 'orders:track' %}?ref={{ order.reference }}" class="btn btn-outline">Track Order</a>
+  </div>
+</div>
+{% endblock %}
